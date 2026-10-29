@@ -1,0 +1,59 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+}
+
+<div class="container mt-4">
+    <h1 class="h3 mb-4">Đơn hàng của tôi</h1>
+
+    @if (Model.Count == 0)
+    {
+        <div class="text-center py-5">
+            <div class="display-6 mb-2">📦</div>
+            <h5>Bạn chưa có đơn hàng nào</h5>
+            <p class="text-muted">Mua sắm ngay để có đơn hàng đầu tiên!</p>
+            <a class="btn btn-dark rounded-pill" asp-area="" asp-controller="Products" asp-action="Index">Mua sắm ngay</a>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-column gap-3">
+            @foreach (var order in Model)
+            {
+                var itemCount = order.OrderDetails.Sum(d => d.Quantity);
+                var statusClass = order.Status switch
+                {
+                    OrderStatus.Completed => "text-bg-success",
+                    OrderStatus.Cancelled => "text-bg-danger",
+                    OrderStatus.Pending => "text-bg-warning",
+                    OrderStatus.Shipped => "text-bg-info",
+                    _ => "text-bg-primary"
+                };
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+                            <div>
+                                <div class="fw-semibold mb-1">
+                                    Đơn #@order.Id
+                                    <span class="badge @statusClass ms-2">@order.Status.GetDisplayName()</span>
+                                </div>
+                                <div class="small text-muted">
+                                    Đặt lúc @order.OrderDate.ToString("dd/MM/yyyy HH:mm") · @itemCount sản phẩm
+                                </div>
+                                <div class="small text-muted">
+                                    Giao đến: @order.Address@(!string.IsNullOrEmpty(order.City) ? $", {order.City}" : "")
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold text-danger fs-5">@order.Total.ToString("n0")₫</div>
+                                <a class="btn btn-sm btn-outline-dark rounded-pill mt-1" asp-area="" asp-action="Details" asp-route-id="@order.Id">
+                                    Xem chi tiết
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

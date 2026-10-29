@@ -1,0 +1,121 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<!-- Hero -->
+<section class="hero-section">
+    <div class="container text-center text-white py-5">
+        <p class="hero-kicker mb-2">Ưu đãi đặc biệt</p>
+        <h1 class="display-4 fw-bold mb-3">iPhone 16 Pro Max</h1>
+        <p class="lead mb-4 mx-auto" style="max-width: 620px;">
+            Chip A18 Pro, camera Control, khung titan. Trả góp 0% qua thẻ tín dụng — giao hàng miễn phí toàn quốc.
+        </p>
+        <a class="btn btn-light btn-lg rounded-pill px-4" asp-area="" asp-controller="Products" asp-action="Index" asp-route-categoryId="1">
+            Mua ngay
+        </a>
+    </div>
+</section>
+
+<!-- Danh mục -->
+<section class="container mt-4">
+    <div class="row g-3">
+        @foreach (var category in Model.Categories)
+        {
+            <div class="col-6 col-md-4 col-lg-2">
+                <a class="category-card text-center d-block text-decoration-none"
+                   asp-area="" asp-controller="Products" asp-action="Index" asp-route-categoryId="@category.Id">
+                    <img src="@category.ImageUrl" alt="@category.Name"
+                         onerror="this.onerror=null;this.src='/images/placeholder.svg';" />
+                    <span class="category-name">@category.Name</span>
+                </a>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Nổi bật -->
+@if (Model.FeaturedProducts.Count > 0)
+{
+    <section class="container mt-5">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <div>
+                <h2 class="section-title mb-1">Sản phẩm nổi bật</h2>
+                <p class="section-subtitle mb-0">Những sản phẩm được yêu thích nhất tại AppleStore</p>
+            </div>
+            <a asp-area="" asp-controller="Products" asp-action="Index" class="btn btn-outline-dark rounded-pill btn-sm">Xem tất cả →</a>
+        </div>
+        <div class="row g-3">
+            @foreach (var product in Model.FeaturedProducts)
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <partial name="_ProductCard" model="product" />
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<!-- Banner giữa -->
+<section class="container mt-5">
+    <div class="promo-banner rounded-4 p-4 p-md-5 d-flex flex-column justify-content-center">
+        <h3 class="fw-bold text-white mb-2">Ưu đãi sinh viên — Giảm ngay 500.000₫</h3>
+        <p class="text-white-50 mb-3">Áp dụng cho toàn bộ MacBook và iPad khi xuất trình thẻ sinh viên.</p>
+        <a class="btn btn-light rounded-pill align-self-start" asp-area="" asp-controller="Products" asp-action="Index" asp-route-categoryId="3">Khám phá Mac →</a>
+    </div>
+</section>
+
+<!-- Hàng mới -->
+@if (Model.NewProducts.Count > 0)
+{
+    <section class="container mt-5">
+        <div class="d-flex justify-content-between align-items-end mb-3">
+            <div>
+                <h2 class="section-title mb-1">Hàng mới về</h2>
+                <p class="section-subtitle mb-0">Cập nhật những chiếc mới nhất từ Apple</p>
+            </div>
+        </div>
+        <div class="row g-3">
+            @foreach (var product in Model.NewProducts.Take(4))
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <partial name="_ProductCard" model="product" />
+                </div>
+            }
+        </div>
+    </section>
+}
+
+<!-- Cam kết -->
+<section class="container mt-5">
+    <div class="row g-3 text-center">
+        <div class="col-6 col-md-3">
+            <div class="promise-card p-3 h-100">
+                <div class="promise-icon">🚚</div>
+                <h6 class="fw-semibold mb-1">Giao hàng miễn phí</h6>
+                <p class="small text-muted mb-0">Cho đơn hàng từ 500.000₫</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="promise-card p-3 h-100">
+                <div class="promise-icon">🛡️</div>
+                <h6 class="fw-semibold mb-1">Bảo hành 12 tháng</h6>
+                <p class="small text-muted mb-0">Chính hãng Apple tại Việt Nam</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="promise-card p-3 h-100">
+                <div class="promise-icon">💳</div>
+                <h6 class="fw-semibold mb-1">Trả góp 0%</h6>
+                <p class="small text-muted mb-0">Qua thẻ tín dụng 12 ngân hàng</p>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="promise-card p-3 h-100">
+                <div class="promise-icon">🔄</div>
+                <h6 class="fw-semibold mb-1">Đổi trả 15 ngày</h6>
+                <p class="small text-muted mb-0">Lỗi đổi mới tại chỗ</p>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,13 @@
+@model Product
+@{
+    ViewData["Title"] = "Thêm sản phẩm";
+}
+
+<form asp-area="Admin" asp-action="Create" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <partial name="_Form" model="Model" />
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,83 @@
+@model List<Product>
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    string? q = ViewBag.q;
+    int page = ViewBag.Page;
+    int totalPages = ViewBag.TotalPages;
+}
+
+<div class="admin-panel">
+    <div class="panel-header">
+        <form class="d-flex gap-2" method="get">
+            <input class="form-control form-control-sm rounded-pill" style="width: 240px;"
+                   type="search" name="q" value="@q" placeholder="Tìm theo tên sản phẩm..." />
+            <button class="btn btn-sm btn-dark rounded-pill" type="submit">Tìm</button>
+        </form>
+        <a class="btn btn-sm btn-dark rounded-pill" asp-area="Admin" asp-action="Create">+ Thêm sản phẩm</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 70px;">Ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th class="text-end">Giá bán</th>
+                    <th class="text-center">Tồn kho</th>
+                    <th class="text-center">Nổi bật</th>
+                    <th style="width: 150px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model)
+                {
+                    <tr>
+                        <td><img src="@product.ImageUrl" alt="@product.Name" class="admin-thumb"
+                                 onerror="this.onerror=null;this.src='/images/placeholder.svg';" /></td>
+                        <td>
+                            <div class="fw-semibold">@product.Name</div>
+                            <div class="small text-muted">@product.Category?.Name</div>
+                        </td>
+                        <td class="text-end">
+                            @product.Price.ToString("n0")₫
+                            @if (product.OldPrice > product.Price)
+                            {
+                                <div class="small text-muted text-decoration-line-through">@product.OldPrice.Value.ToString("n0")₫</div>
+                            }
+                        </td>
+                        <td class="text-center">
+                            <span class="badge @(product.Stock == 0 ? "text-bg-danger" : product.Stock <= 10 ? "text-bg-warning" : "text-bg-success") rounded-pill">
+                                @product.Stock
+                            </span>
+                        </td>
+                        <td class="text-center">@(product.IsFeatured ? "⭐" : "—")</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-dark rounded-pill" asp-area="Admin" asp-action="Edit" asp-route-id="@product.Id">Sửa</a>
+                            <a class="btn btn-sm btn-outline-danger rounded-pill" asp-area="Admin" asp-action="Delete" asp-route-id="@product.Id">Xoá</a>
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-4">Không tìm thấy sản phẩm nào.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if (totalPages > 1)
+    {
+        <div class="panel-header justify-content-center">
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    @for (var i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == page ? "active" : "")">
+                            <a class="page-link" asp-area="Admin" asp-action="Index" asp-route-page="@i" asp-route-q="@q">@i</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+</div>

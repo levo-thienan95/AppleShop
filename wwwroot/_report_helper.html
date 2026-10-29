@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head><meta charset="utf-8"><title>report-helper</title></head>
+<body><pre id="log">running…</pre>
+<script>
+const log = m => { document.getElementById('log').textContent += "\n" + m; };
+const tok = html => (html.match(/name="__RequestVerificationToken"[^>]*value="([^"]+)"/) || [,''])[1];
+async function getText(url){ const r = await fetch(url, {credentials:'same-origin'}); return await r.text(); }
+async function postForm(url, data){
+  return await fetch(url, {method:'POST', credentials:'same-origin',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams(data)});
+}
+const params = new URLSearchParams(location.search);
+const mode = params.get('mode');
+const next = params.get('next');
+const go = () => { if (next) { log('go ' + next); location.href = next; } };
+(async () => {
+  try {
+    if (mode === 'customer') {
+      // đăng nhập tường minh (tài khoản khách đã được tạo từ lần chụp trước)
+      const lg = await getText('/Identity/Account/Login');
+      const r = await postForm('/Identity/Account/Login', {
+        'Input.Email':'baocao@example.com','Input.Password':'Abc12345','Input.RememberMe':'true',
+        'returnUrl':'/', '__RequestVerificationToken': tok(lg)});
+      log('login ' + r.status + ' -> ' + r.url);
+      if (r.url.includes('Login')) { log('LOGIN FAILED'); }
+      else {
+        const t2 = tok(await getText('/Products/Details/1'));
+        await postForm('/Cart/Add', {productId:'1', quantity:'1', returnUrl:'/Products/Details/1', '__RequestVerificationToken':t2});
+        await postForm('/Cart/Add', {productId:'5', quantity:'1', returnUrl:'/Products/Details/5', '__RequestVerificationToken':t2});
+        log('cart ok');
+      }
+      go();
+    } else if (mode === 'order') {
+      const lg = await getText('/Identity/Account/Login');
+      await postForm('/Identity/Account/Login', {
+        'Input.Email':'baocao@example.com','Input.Password':'Abc12345','Input.RememberMe':'true',
+        'returnUrl':'/','__RequestVerificationToken': tok(lg)});
+      const t2 = tok(await getText('/Products/Details/3'));
+      await postForm('/Cart/Add', {productId:'3', quantity:'2', returnUrl:'/Products/Details/3', '__RequestVerificationToken':t2});
+      const co = await getText('/Cart/Checkout');
+      const r = await postForm('/Cart/Checkout', {
+        'FullName':'Nguyễn Văn Báo Cáo','Phone':'0901234567','Email':'baocao@example.com',
+        'Address':'123 đường ABC, phường Phú Mỹ','City':'Trà Vinh','Note':'Giao giờ hành chính',
+        '__RequestVerificationToken': tok(co)});
+      log('order ' + r.status + ' -> ' + r.url);
+      go();
+    } else if (mode === 'checkout') {
+      const co = await getText('/Cart/Checkout');
+      const r = await postForm('/Cart/Checkout', {
+        'FullName':'Nguyễn Văn Báo Cáo','Phone':'0901234567','Email':'baocao@example.com',
+        'Address':'123 đường ABC, phường Phú Mỹ','City':'Trà Vinh','Note':'Giao giờ hành chính',
+        '__RequestVerificationToken': tok(co)});
+      log('checkout ' + r.status + ' -> ' + r.url);
+      go();
+    } else if (mode === 'admin') {
+      const lg = await getText('/Identity/Account/Login');
+      const r = await postForm('/Identity/Account/Login', {
+        'Input.Email':'admin@applestore.vn','Input.Password':'Admin@123','Input.RememberMe':'true',
+        'returnUrl':'/Admin/Dashboard','__RequestVerificationToken': tok(lg)});
+      log('admin login ' + r.status + ' -> ' + r.url);
+      go();
+    } else { log('no mode'); go(); }
+    log('DONE');
+  } catch (e) { log('ERROR ' + e); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+@{
+    ViewData["Title"] = "Tổng quan";
+    decimal revenue = ViewBag.Revenue;
+    int orderCount = ViewBag.OrderCount;
+    int pendingCount = ViewBag.PendingCount;
+    int productCount = ViewBag.ProductCount;
+    int userCount = ViewBag.UserCount;
+    var recentOrders = (IEnumerable<dynamic>)ViewBag.RecentOrders;
+    var lowStock = (IEnumerable<dynamic>)ViewBag.LowStock;
+    var topProducts = (IEnumerable<dynamic>)ViewBag.TopProducts;
+
+    string Badge(object status) => status?.ToString() switch
+    {
+        "Pending" => "text-bg-warning",
+        "Processing" => "text-bg-primary",
+        "Shipped" => "text-bg-info",
+        "Completed" => "text-bg-success",
+        "Cancelled" => "text-bg-danger",
+        _ => "text-bg-secondary"
+    };
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3">
+        <div class="stat-card d-flex justify-content-between align-items-center">
+            <div>
+                <div class="stat-label">Doanh thu</div>
+                <div class="stat-value">@revenue.ToString("n0")₫</div>
+            </div>
+            <div class="stat-icon">💰</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card d-flex justify-content-between align-items-center">
+            <div>
+                <div class="stat-label">Đơn hàng</div>
+                <div class="stat-value">@orderCount</div>
+                <div class="small text-warning">@pendingCount chờ xác nhận</div>
+            </div>
+            <div class="stat-icon">🧾</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card d-flex justify-content-between align-items-center">
+            <div>
+                <div class="stat-label">Sản phẩm</div>
+                <div class="stat-value">@productCount</div>
+            </div>
+            <div class="stat-icon">📦</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3">
+        <div class="stat-card d-flex justify-content-between align-items-center">
+            <div>
+                <div class="stat-label">Tài khoản</div>
+                <div class="stat-value">@userCount</div>
+            </div>
+            <div class="stat-icon">👥</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Đơn gần đây -->
+    <div class="col-lg-7">
+        <div class="admin-panel">
+            <div class="panel-header">
+                Đơn hàng gần đây
+                <a class="btn btn-sm btn-outline-dark rounded-pill" asp-area="Admin" asp-controller="Orders" asp-action="Index">Xem tất cả</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr><th>Mã</th><th>Khách hàng</th><th>Ngày</th><th>Tổng</th><th>Trạng thái</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in recentOrders)
+                        {
+                            <tr>
+                                <td>
+                                    <a asp-area="Admin" asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id">#@order.Id</a>
+                                </td>
+                                <td>@order.FullName</td>
+                                <td class="small text-muted">@(((DateTime)order.OrderDate).ToString("dd/MM HH:mm"))</td>
+                                <td class="fw-semibold">@(((decimal)order.Total).ToString("n0"))₫</td>
+                                <td><span class="badge @Badge(order.Status)">@(((AppleStore.Models.OrderStatus)order.Status).GetDisplayName())</span></td>
+                            </tr>
+                        }
+                        @if (!recentOrders.Any())
+                        {
+                            <tr><td colspan="5" class="text-center text-muted py-4">Chưa có đơn hàng nào.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top doanh thu -->
+    <div class="col-lg-5">
+        <div class="admin-panel mb-3">
+            <div class="panel-header">🏆 Top sản phẩm theo doanh thu</div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr><th>Sản phẩm</th><th class="text-center">Đã bán</th><th class="text-end">Doanh thu</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in topProducts)
+                        {
+                            <tr>
+                                <td>@p.Name</td>
+                                <td class="text-center">@p.Quantity</td>
+                                <td class="text-end fw-semibold">@(((decimal)p.Revenue).ToString("n0"))₫</td>
+                            </tr>
+                        }
+                        @if (!topProducts.Any())
+                        {
+                            <tr><td colspan="3" class="text-center text-muted py-4">Chưa có dữ liệu.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="admin-panel">
+            <div class="panel-header">⚠️ Sắp hết hàng (≤ 10)</div>
+            <ul class="list-group list-group-flush">
+                @foreach (var p in lowStock)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="d-flex align-items-center gap-2">
+                            <img src="@p.ImageUrl" alt="" class="admin-thumb" style="width:34px;height:34px;"
+                                 onerror="this.onerror=null;this.src='/images/placeholder.svg';" />
+                            @p.Name
+                        </span>
+                        <span class="badge @(p.Stock == 0 ? "text-bg-danger" : "text-bg-warning") rounded-pill">@p.Stock</span>
+                    </li>
+                }
+                @if (!lowStock.Any())
+                {
+                    <li class="list-group-item text-center text-muted py-4">Tồn kho đều ổn 👍</li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

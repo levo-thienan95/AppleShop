@@ -1,0 +1,44 @@
+@model Product
+
+<div class="card product-card h-100 border-0 shadow-sm">
+    <a asp-area="" asp-controller="Products" asp-action="Details" asp-route-id="@Model.Slug" class="product-image-link">
+        <div class="product-image-box">
+            <img src="@Model.ImageUrl" alt="@Model.Name" class="product-image" loading="lazy"
+                 onerror="this.onerror=null;this.src='/images/placeholder.svg';" />
+            @if (Model.OldPrice > Model.Price)
+            {
+                var discount = Math.Round((1 - Model.Price / Model.OldPrice.Value) * 100);
+                <span class="discount-badge">-@discount%</span>
+            }
+        </div>
+    </a>
+    <div class="card-body d-flex flex-column">
+        <div class="product-category">@Model.Category?.Name</div>
+        <a asp-area="" asp-controller="Products" asp-action="Details" asp-route-id="@Model.Slug" class="product-name text-dark text-decoration-none">
+            @Model.Name
+        </a>
+        <p class="product-short mb-2">@Model.ShortDescription</p>
+        <div class="mt-auto">
+            <div class="d-flex align-items-baseline gap-2 flex-wrap">
+                <span class="product-price">@Model.Price.ToString("n0")₫</span>
+                @if (Model.OldPrice > Model.Price)
+                {
+                    <span class="product-old-price">@Model.OldPrice.Value.ToString("n0")₫</span>
+                }
+            </div>
+            @if (Model.Stock <= 0)
+            {
+                <span class="badge text-bg-secondary mt-2">Hết hàng</span>
+            }
+            else
+            {
+                <form asp-area="" asp-controller="Cart" asp-action="Add" method="post" class="mt-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                    <button type="submit" class="btn btn-dark w-100 rounded-pill btn-sm">Thêm vào giỏ</button>
+                </form>
+            }
+        </div>
+    </div>
+</div>

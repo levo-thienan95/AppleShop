@@ -1,0 +1,107 @@
+@model Order
+@{
+    ViewData["Title"] = $"Đơn hàng #{Model.Id}";
+
+    string BadgeClass(OrderStatus s) => s switch
+    {
+        OrderStatus.Pending => "text-bg-warning",
+        OrderStatus.Processing => "text-bg-primary",
+        OrderStatus.Shipped => "text-bg-info",
+        OrderStatus.Completed => "text-bg-success",
+        OrderStatus.Cancelled => "text-bg-danger",
+        _ => "text-bg-secondary"
+    };
+}
+
+<div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+    <h2 class="h5 mb-0">Đơn #@Model.Id</h2>
+    <span class="badge @BadgeClass(Model.Status)">@Model.Status.GetDisplayName()</span>
+    <span class="small text-muted">Đặt lúc @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</span>
+    <a class="btn btn-sm btn-outline-secondary rounded-pill ms-auto" asp-area="Admin" asp-action="Index">← Danh sách đơn</a>
+</div>
+
+<div class="row g-3">
+    <!-- Sản phẩm -->
+    <div class="col-lg-7">
+        <div class="admin-panel">
+            <div class="panel-header">Sản phẩm trong đơn</div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th class="text-center">SL</th>
+                            <th class="text-end">Đơn giá</th>
+                            <th class="text-end">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var detail in Model.OrderDetails)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="@detail.Product?.ImageUrl" alt="" class="admin-thumb"
+                                             onerror="this.onerror=null;this.src='/images/placeholder.svg';" />
+                                        <a asp-area="" asp-controller="Products" asp-action="Details" asp-route-id="@detail.ProductId" target="_blank">
+                                            @(detail.Product?.Name ?? $"SP #{detail.ProductId}")
+                                        </a>
+                                    </div>
+                                </td>
+                                <td class="text-center">@detail.Quantity</td>
+                                <td class="text-end">@detail.UnitPrice.ToString("n0")₫</td>
+                                <td class="text-end fw-semibold">@((detail.UnitPrice * detail.Quantity).ToString("n0"))₫</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end text-muted">Tổng cộng</td>
+                            <td class="text-end fw-bold text-danger">@Model.Total.ToString("n0")₫</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Khách hàng + cập nhật -->
+    <div class="col-lg-5">
+        <div class="admin-panel mb-3">
+            <div class="panel-header">Khách hàng</div>
+            <div class="panel-body small">
+                <div class="mb-1"><strong>Họ tên:</strong> @Model.FullName</div>
+                <div class="mb-1"><strong>SĐT:</strong> @Model.Phone</div>
+                <div class="mb-1"><strong>Email:</strong> @Model.Email</div>
+                <div class="mb-1"><strong>Địa chỉ:</strong> @Model.Address@(!string.IsNullOrEmpty(Model.City) ? $", {Model.City}" : "")</div>
+                @if (!string.IsNullOrEmpty(Model.Note))
+                {
+                    <div class="mb-1"><strong>Ghi chú:</strong> @Model.Note</div>
+                }
+                <div class="text-muted mt-2">Tài khoản: @(Model.User?.Email ?? "Khách vãng lai")</div>
+            </div>
+        </div>
+
+        <div class="admin-panel">
+            <div class="panel-header">Cập nhật trạng thái</div>
+            <div class="panel-body">
+                <form asp-area="Admin" asp-action="UpdateStatus" method="post" class="d-flex gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <select name="status" class="form-select rounded-pill">
+                        @foreach (OrderStatus status in Enum.GetValues<OrderStatus>())
+                        {
+                            <option value="@status" selected="@(Model.Status == status ? "selected" : null)">
+                                @status.GetDisplayName()
+                            </option>
+                        }
+                    </select>
+                    <button type="submit" class="btn btn-dark rounded-pill px-4">Cập nhật</button>
+                </form>
+                <div class="form-text mt-2">
+                    💡 Khi chọn <strong>Đã hủy</strong>, hệ thống sẽ tự hoàn lại tồn kho cho các sản phẩm trong đơn.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

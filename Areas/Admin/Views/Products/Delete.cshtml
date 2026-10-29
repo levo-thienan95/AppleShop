@@ -1,0 +1,28 @@
+@model Product
+@{
+    ViewData["Title"] = "Xoá sản phẩm";
+}
+
+<div class="admin-panel" style="max-width: 620px;">
+    <div class="panel-header text-danger">⚠️ Xác nhận xoá</div>
+    <div class="panel-body">
+        <div class="d-flex gap-3 mb-3">
+            <img src="@Model.ImageUrl" alt="@Model.Name" class="admin-thumb"
+                 style="width: 90px; height: 90px;" onerror="this.onerror=null;this.src='/images/placeholder.svg';" />
+            <div>
+                <div class="fw-bold fs-5">@Model.Name</div>
+                <div class="text-muted">@Model.Category?.Name — @Model.Price.ToString("n0")₫</div>
+            </div>
+        </div>
+
+        <p class="text-muted">
+            Hành động này không thể hoàn tác. Sản phẩm <strong>đã xuất hiện trong đơn hàng</strong> sẽ không xoá được.
+        </p>
+
+        <form asp-area="Admin" asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-flex gap-2">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-danger rounded-pill px-4">Xoá vĩnh viễn</button>
+            <a class="btn btn-outline-secondary rounded-pill" asp-area="Admin" asp-action="Index">Huỷ</a>
+        </form>
+    </div>
+</div>

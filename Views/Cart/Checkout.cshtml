@@ -1,0 +1,95 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Đặt hàng";
+    var cart = (List<CartItem>)ViewBag.Cart;
+    var total = (decimal)ViewBag.CartTotal;
+}
+
+<div class="container mt-4">
+    <h1 class="h3 mb-4">Xác nhận &amp; đặt hàng</h1>
+
+    <div class="row g-4">
+        <!-- Form giao hàng -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm p-4">
+                <h5 class="mb-3">Thông tin giao hàng</h5>
+                <form asp-area="" asp-action="Checkout" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="FullName" class="form-label"></label>
+                            <input asp-for="FullName" class="form-control" />
+                            <span asp-validation-for="FullName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Phone" class="form-label"></label>
+                            <input asp-for="Phone" class="form-control" placeholder="09xx xxx xxx" />
+                            <span asp-validation-for="Phone" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" type="email" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Address" class="form-label"></label>
+                            <input asp-for="Address" class="form-control" placeholder="Số nhà, đường, quận/huyện" />
+                            <span asp-validation-for="Address" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="City" class="form-label"></label>
+                            <input asp-for="City" class="form-control" placeholder="Tỉnh / Thành phố" />
+                            <span asp-validation-for="City" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Note" class="form-label"></label>
+                            <textarea asp-for="Note" class="form-control" rows="2"
+                                      placeholder="Ghi chú cho người giao hàng (khung giờ, để dưới chung cư...)"></textarea>
+                            <span asp-validation-for="Note" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-light border mt-4 small mb-3">
+                        💳 <strong>Thanh toán khi nhận hàng (COD)</strong> — bạn kiểm tra hàng rồi mới thanh toán.
+                    </div>
+
+                    <button type="submit" class="btn btn-dark rounded-pill px-5">Đặt hàng — @total.ToString("n0")₫</button>
+                    <a class="btn btn-link" asp-area="" asp-action="Index">Quay lại giỏ hàng</a>
+                </form>
+            </div>
+        </div>
+
+        <!-- Đơn hàng của bạn -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm p-4">
+                <h5 class="mb-3">Đơn hàng (@cart.Sum(i => i.Quantity) sản phẩm)</h5>
+                <ul class="list-unstyled">
+                    @foreach (var item in cart)
+                    {
+                        <li class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="@item.ImageUrl" alt="" class="checkout-thumb"
+                                     onerror="this.onerror=null;this.src='/images/placeholder.svg';" />
+                                <div>
+                                    <div class="small fw-semibold">@item.Name</div>
+                                    <div class="small text-muted">x @item.Quantity</div>
+                                </div>
+                            </div>
+                            <span class="small fw-semibold">@item.Subtotal.ToString("n0")₫</span>
+                        </li>
+                    }
+                </ul>
+                <hr />
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Tạm tính</span><span>@total.ToString("n0")₫</span>
+                </div>
+                <div class="d-flex justify-content-between mb-1">
+                    <span class="text-muted">Phí vận chuyển</span><span class="text-success">Miễn phí</span>
+                </div>
+                <div class="d-flex justify-content-between fw-bold fs-5">
+                    <span>Tổng</span><span>@total.ToString("n0")₫</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

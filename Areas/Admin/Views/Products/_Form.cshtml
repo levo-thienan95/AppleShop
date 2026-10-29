@@ -1,0 +1,100 @@
+@model Product
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="admin-panel">
+            <div class="panel-header">Thông tin sản phẩm</div>
+            <div class="panel-body">
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" placeholder="Ví dụ: iPhone 16 Pro Max 256GB" />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Slug" class="form-label">Đường dẫn (slug)</label>
+                    <input asp-for="Slug" class="form-control" placeholder="Để trống sẽ tự sinh theo tên" />
+                    <span asp-validation-for="Slug" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CategoryId" class="form-label">Danh mục</label>
+                    <select asp-for="CategoryId" class="form-select" asp-items="@(SelectList)ViewBag.Categories">
+                        <option value="">— Chọn danh mục —</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="Price" class="form-label"></label>
+                        <input asp-for="Price" class="form-control" type="number" min="0" step="1000" />
+                        <span asp-validation-for="Price" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="OldPrice" class="form-label"></label>
+                        <input asp-for="OldPrice" class="form-control" type="number" min="0" step="1000"
+                               placeholder="Để trống nếu không giảm giá" />
+                        <span asp-validation-for="OldPrice" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Stock" class="form-label"></label>
+                        <input asp-for="Stock" class="form-control" type="number" min="0" />
+                        <span asp-validation-for="Stock" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3 mt-3">
+                    <label asp-for="ShortDescription" class="form-label"></label>
+                    <input asp-for="ShortDescription" class="form-control" maxlength="1000"
+                           placeholder="Một dòng mô tả ngắn hiện trên card sản phẩm" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="6"
+                              placeholder="Mô tả chi tiết (hãng, thông số, tính năng...)"></textarea>
+                </div>
+
+                <div class="form-check">
+                    <input asp-for="IsFeatured" class="form-check-input" />
+                    <label asp-for="IsFeatured" class="form-check-label"></label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="admin-panel">
+            <div class="panel-header">Ảnh sản phẩm</div>
+            <div class="panel-body">
+                <div class="text-center mb-3">
+                    <img id="imagePreview" src="@(string.IsNullOrWhiteSpace(Model.ImageUrl) ? "/images/placeholder.svg" : Model.ImageUrl)"
+                         alt="Xem trước" class="admin-thumb" style="width: 150px; height: 150px; object-fit: contain;" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tải ảnh lên (jpg/png/webp, ≤ 2MB)</label>
+                    <input type="file" name="imageFile" class="form-control" accept="image/*"
+                           onchange="document.getElementById('imagePreview').src = this.files[0] ? URL.createObjectURL(this.files[0]) : document.getElementById('imagePreview').src" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ImageUrl" class="form-label">hoặc đường dẫn ảnh (URL)</label>
+                    <input asp-for="ImageUrl" class="form-control" placeholder="/images/products/ten-anh.jpg" />
+                    <span asp-validation-for="ImageUrl" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CreatedAt" class="form-label"></label>
+                    <input asp-for="CreatedAt" class="form-control" type="datetime-local" />
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3 d-grid gap-2">
+            <button type="submit" class="btn btn-dark rounded-pill">Lưu sản phẩm</button>
+            <a class="btn btn-outline-secondary rounded-pill" asp-area="Admin" asp-action="Index">Quay lại</a>
+        </div>
+    </div>
+</div>

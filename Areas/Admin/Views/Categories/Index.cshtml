@@ -1,0 +1,43 @@
+@model List<Category>
+@{
+    ViewData["Title"] = "Quản lý danh mục";
+    var counts = (Dictionary<int, int>)ViewBag.Counts;
+}
+
+<div class="admin-panel">
+    <div class="panel-header">
+        Danh mục sản phẩm
+        <a class="btn btn-sm btn-dark rounded-pill" asp-area="Admin" asp-action="Create">+ Thêm danh mục</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 70px;">Ảnh</th>
+                    <th>Tên danh mục</th>
+                    <th>Mô tả</th>
+                    <th class="text-center">Sản phẩm</th>
+                    <th style="width: 150px;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var category in Model)
+                {
+                    <tr>
+                        <td><img src="@category.ImageUrl" alt="@category.Name" class="admin-thumb"
+                                 onerror="this.onerror=null;this.src='/images/placeholder.svg';" /></td>
+                        <td class="fw-semibold">@category.Name<div class="small text-muted">/@category.Slug</div></td>
+                        <td class="small text-muted">@category.Description</td>
+                        <td class="text-center">
+                            <span class="badge text-bg-light rounded-pill border">@counts.GetValueOrDefault(category.Id, 0)</span>
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-dark rounded-pill" asp-area="Admin" asp-action="Edit" asp-route-id="@category.Id">Sửa</a>
+                            <a class="btn btn-sm btn-outline-danger rounded-pill" asp-area="Admin" asp-action="Delete" asp-route-id="@category.Id">Xoá</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,100 @@
+@model ProductDetailViewModel
+@{
+    ViewData["Title"] = Model.Product.Name;
+    var product = Model.Product;
+    var discount = product.OldPrice > product.Price
+        ? (int?)Math.Round((1 - product.Price / product.OldPrice.Value) * 100)
+        : null;
+}
+
+<nav aria-label="breadcrumb" class="container mt-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item">
+            <a asp-area="" asp-controller="Products" asp-action="Index" asp-route-categoryId="@product.CategoryId">@product.Category?.Name</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">@product.Name</li>
+    </ol>
+</nav>
+
+<div class="container">
+    <div class="row g-4 product-detail">
+        <!-- Ảnh -->
+        <div class="col-md-6">
+            <div class="detail-image-box rounded-4">
+                <img src="@product.ImageUrl" alt="@product.Name"
+                     onerror="this.onerror=null;this.src='/images/placeholder.svg';" />
+            </div>
+        </div>
+
+        <!-- Thông tin -->
+        <div class="col-md-6">
+            <div class="product-category mb-1">@product.Category?.Name</div>
+            <h1 class="h3 fw-semibold mb-3">@product.Name</h1>
+
+            <div class="d-flex align-items-baseline gap-3 flex-wrap mb-3">
+                <span class="detail-price">@product.Price.ToString("n0")₫</span>
+                @if (discount.HasValue)
+                {
+                    <span class="product-old-price fs-5">@product.OldPrice!.Value.ToString("n0")₫</span>
+                    <span class="badge text-bg-danger rounded-pill">Giảm @discount%</span>
+                }
+            </div>
+
+            <p class="text-muted mb-4">@product.ShortDescription</p>
+
+            @if (product.Stock > 0)
+            {
+                <p class="mb-3">
+                    <span class="badge text-bg-success rounded-pill">Còn hàng</span>
+                    <span class="small text-muted ms-2">(@product.Stock chiếc sẵn kho)</span>
+                </p>
+
+                <form asp-area="" asp-controller="Cart" asp-action="Add" method="post" class="d-flex flex-wrap gap-2 align-items-center">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="productId" value="@product.Id" />
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                    <div class="input-group" style="width: 140px;">
+                        <button class="btn btn-outline-secondary" type="button" onclick="qty.stepDown()">−</button>
+                        <input type="number" id="qty" name="quantity" class="form-control text-center" value="1" min="1" max="@product.Stock" />
+                        <button class="btn btn-outline-secondary" type="button" onclick="qty.stepUp()">+</button>
+                    </div>
+                    <button type="submit" class="btn btn-dark rounded-pill px-4">Thêm vào giỏ hàng</button>
+                </form>
+            }
+            else
+            {
+                <span class="badge text-bg-secondary rounded-pill py-2 px-3">⚠️ Tạm hết hàng</span>
+            }
+
+            <ul class="list-unstyled detail-features mt-4">
+                <li>✅ Bảo hành chính hãng 12 tháng toàn quốc</li>
+                <li>✅ Giao miễn phí nội thành trong 24 giờ</li>
+                <li>✅ Đổi trả 15 ngày nếu lỗi nhà sản xuất</li>
+                <li>✅ Trả góp 0% qua thẻ tín dụng</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Mô tả -->
+    <div class="mt-5">
+        <h2 class="h5 border-bottom pb-2">Thông tin sản phẩm</h2>
+        <div class="mt-3" style="white-space: pre-line;">@product.Description</div>
+    </div>
+
+    <!-- Liên quan -->
+    @if (Model.RelatedProducts.Count > 0)
+    {
+        <div class="mt-5">
+            <h2 class="h5 border-bottom pb-2 mb-3">Sản phẩm cùng danh mục</h2>
+            <div class="row g-3">
+                @foreach (var item in Model.RelatedProducts)
+                {
+                    <div class="col-6 col-md-3">
+                        <partial name="_ProductCard" model="item" />
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

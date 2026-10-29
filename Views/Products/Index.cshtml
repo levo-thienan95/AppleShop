@@ -1,0 +1,97 @@
+@model ProductCatalogViewModel
+@{
+    ViewData["Title"] = Model.CategoryName ?? "Tất cả sản phẩm";
+    var categories = Model.Categories;
+}
+
+<nav aria-label="breadcrumb" class="container mt-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+    </ol>
+</nav>
+
+<div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-end mb-3">
+        <div>
+            <h1 class="h3 mb-1">@(Model.CategoryName ?? "Tất cả sản phẩm")</h1>
+            <p class="text-muted mb-0">
+                @Model.TotalCount sản phẩm
+                @if (!string.IsNullOrWhiteSpace(Model.Search))
+                {
+                    <span>cho từ khóa "<strong>@Model.Search</strong>"</span>
+                }
+            </p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+            <label class="small text-muted" for="sortSelect">Sắp xếp:</label>
+            <select id="sortSelect" class="form-select form-select-sm rounded-pill" style="width: auto;"
+                    onchange="location.href='@Url.Action("Index", "Products")?categoryId=@(Model.CategoryId?.ToString() ?? "")&q=@Model.Search&sort=' + this.value">
+                <option value="new" selected="@(Model.SortBy == "new" ? "selected" : null)">Mới nhất</option>
+                <option value="price-asc" selected="@(Model.SortBy == "price-asc" ? "selected" : null)">Giá thấp → cao</option>
+                <option value="price-desc" selected="@(Model.SortBy == "price-desc" ? "selected" : null)">Giá cao → thấp</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Danh mục (dạng pill, hiển thị trên mobile lẫn desktop) -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a class="btn btn-sm rounded-pill @(Model.CategoryId == null ? "btn-dark" : "btn-outline-secondary")"
+           asp-area="" asp-action="Index" asp-route-q="@Model.Search">Tất cả</a>
+        @foreach (var category in categories)
+        {
+            <a class="btn btn-sm rounded-pill @(Model.CategoryId == category.Id ? "btn-dark" : "btn-outline-secondary")"
+               asp-area="" asp-action="Index" asp-route-categoryId="@category.Id" asp-route-q="@Model.Search">
+                @category.Name
+            </a>
+        }
+    </div>
+
+    @if (Model.Products.Count == 0)
+    {
+        <div class="text-center py-5">
+            <div class="display-6 mb-2">🔍</div>
+            <h5>Không tìm thấy sản phẩm nào</h5>
+            <p class="text-muted">Thử từ khóa khác hoặc xem tất cả sản phẩm.</p>
+            <a class="btn btn-dark rounded-pill" asp-area="" asp-action="Index">Xem tất cả</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var product in Model.Products)
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <partial name="_ProductCard" model="product" />
+                </div>
+            }
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Phân trang" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(Model.HasPrevious ? "" : "disabled")">
+                        <a class="page-link"
+                           asp-area="" asp-action="Index" asp-route-page="@(Model.Page - 1)"
+                           asp-route-categoryId="@Model.CategoryId" asp-route-q="@Model.Search" asp-route-sort="@Model.SortBy">«</a>
+                    </li>
+                    @for (var i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.Page ? "active" : "")">
+                            <a class="page-link"
+                               asp-area="" asp-action="Index" asp-route-page="@i"
+                               asp-route-categoryId="@Model.CategoryId" asp-route-q="@Model.Search" asp-route-sort="@Model.SortBy">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.HasNext ? "" : "disabled")">
+                        <a class="page-link"
+                           asp-area="" asp-action="Index" asp-route-page="@(Model.Page + 1)"
+                           asp-route-categoryId="@Model.CategoryId" asp-route-q="@Model.Search" asp-route-sort="@Model.SortBy">»</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    }
+</div>

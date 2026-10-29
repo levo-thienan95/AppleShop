@@ -1,0 +1,36 @@
+@model Category
+@{
+    ViewData["Title"] = $"Sửa: {Model.Name}";
+}
+
+<div class="admin-panel" style="max-width: 640px;">
+    <div class="panel-header">Cập nhật danh mục</div>
+    <div class="panel-body">
+        <form asp-area="Admin" asp-action="Edit" asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Slug" />
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ImageUrl" class="form-label">Ảnh (URL)</label>
+                <input asp-for="ImageUrl" class="form-control" />
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-dark rounded-pill px-4">Lưu</button>
+                <a class="btn btn-outline-secondary rounded-pill" asp-area="Admin" asp-action="Index">Quay lại</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

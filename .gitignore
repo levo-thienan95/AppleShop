@@ -1,0 +1,12 @@
+# Build output
+bin/
+obj/
+
+# IDE / OS
+.vs/
+.vscode/
+*.user
+.DS_Store
+
+# Cấu hình local chứa connection string
+appsettings.Development.json

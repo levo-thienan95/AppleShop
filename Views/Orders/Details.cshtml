@@ -1,0 +1,112 @@
+@model Order
+@{
+    ViewData["Title"] = $"Đơn hàng #{Model.Id}";
+    var statusClass = Model.Status switch
+    {
+        OrderStatus.Completed => "text-bg-success",
+        OrderStatus.Cancelled => "text-bg-danger",
+        OrderStatus.Pending => "text-bg-warning",
+        OrderStatus.Shipped => "text-bg-info",
+        _ => "text-bg-primary"
+    };
+}
+
+<div class="container mt-4">
+    @if (TempData["OrderPlaced"] != null)
+    {
+        <div class="alert alert-success">🎉 @TempData["OrderPlaced"]</div>
+    }
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-area="" asp-action="Index">Đơn hàng của tôi</a></li>
+            <li class="breadcrumb-item active" aria-current="page">#@Model.Id</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+        <h1 class="h3 mb-0">Đơn hàng #@Model.Id</h1>
+        <span class="badge @statusClass">@Model.Status.GetDisplayName()</span>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white fw-semibold">Sản phẩm đã đặt</div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th class="text-center">SL</th>
+                                <th class="text-end">Đơn giá</th>
+                                <th class="text-end">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detail in Model.OrderDetails)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <img src="@detail.Product?.ImageUrl" alt="" class="cart-thumb"
+                                                 onerror="this.onerror=null;this.src='/images/placeholder.svg';" />
+                                            <a asp-area="" asp-controller="Products" asp-action="Details" asp-route-id="@detail.ProductId"
+                                               class="text-dark text-decoration-none">
+                                                @(detail.Product?.Name ?? $"Sản phẩm #{detail.ProductId}")
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">@detail.Quantity</td>
+                                    <td class="text-end">@detail.UnitPrice.ToString("n0")₫</td>
+                                    <td class="text-end fw-semibold">@((detail.UnitPrice * detail.Quantity).ToString("n0"))₫</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end text-muted">Tổng cộng</td>
+                                <td class="text-end fw-bold text-danger">@Model.Total.ToString("n0")₫</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm p-4 mb-3">
+                <h6 class="fw-semibold mb-3">Thông tin giao hàng</h6>
+                <div class="small mb-1"><strong>Họ tên:</strong> @Model.FullName</div>
+                <div class="small mb-1"><strong>SĐT:</strong> @Model.Phone</div>
+                <div class="small mb-1"><strong>Email:</strong> @Model.Email</div>
+                <div class="small mb-1">
+                    <strong>Địa chỉ:</strong> @Model.Address@(!string.IsNullOrEmpty(Model.City) ? $", {Model.City}" : "")
+                </div>
+                @if (!string.IsNullOrEmpty(Model.Note))
+                {
+                    <div class="small mb-1"><strong>Ghi chú:</strong> @Model.Note</div>
+                }
+                <div class="small text-muted mt-2">Ngày đặt: @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</div>
+            </div>
+
+            <div class="card border-0 shadow-sm p-4">
+                <h6 class="fw-semibold mb-2">Trạng thái đơn hàng</h6>
+                <ul class="list-unstyled small status-timeline mb-0">
+                    <li class="@(Model.Status != OrderStatus.Cancelled ? "done" : "cancelled")">
+                        🕒 Đặt hàng thành công — @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")
+                    </li>
+                    <li class="@(Model.Status is OrderStatus.Processing or OrderStatus.Shipped or OrderStatus.Completed ? "done" : "")">
+                        📦 Đang xử lý &amp; đóng gói
+                    </li>
+                    <li class="@(Model.Status is OrderStatus.Shipped or OrderStatus.Completed ? "done" : "")">
+                        🚚 Đang giao hàng
+                    </li>
+                    <li class="@(Model.Status == OrderStatus.Completed ? "done" : "")">
+                        ✅ Hoàn thành
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

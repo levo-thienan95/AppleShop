@@ -1,0 +1,14 @@
+@model Product
+@{
+    ViewData["Title"] = $"Sửa: {Model.Name}";
+}
+
+<form asp-area="Admin" asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <partial name="_Form" model="Model" />
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

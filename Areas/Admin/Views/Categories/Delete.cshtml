@@ -1,0 +1,17 @@
+@model Category
+@{
+    ViewData["Title"] = "Xoá danh mục";
+}
+
+<div class="admin-panel" style="max-width: 560px;">
+    <div class="panel-header text-danger">⚠️ Xác nhận xoá danh mục</div>
+    <div class="panel-body">
+        <p>Bạn chắc chắn muốn xoá danh mục <strong>@Model.Name</strong>?</p>
+        <p class="small text-muted">Danh mục còn sản phẩm thuộc về sẽ không xoá được.</p>
+        <form asp-area="Admin" asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-flex gap-2">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-danger rounded-pill px-4">Xoá</button>
+            <a class="btn btn-outline-secondary rounded-pill" asp-area="Admin" asp-action="Index">Huỷ</a>
+        </form>
+    </div>
+</div>

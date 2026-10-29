@@ -1,0 +1,13 @@
+@model List<Category>
+
+@foreach (var category in Model)
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-categoryId="@category.Id">
+            @category.Name
+        </a>
+    </li>
+}
+<li class="nav-item">
+    <a class="nav-link fw-semibold" asp-area="" asp-controller="Products" asp-action="Index">Tất cả</a>
+</li>
